@@ -87,9 +87,20 @@ CLI.
 
 ### Some Common Commands
 
-* ls: lists the name of the files in the current directory
-* unzip: takes one argument. It unzips the file and lists the file names.
-* cat: this command "concatenates" the file. It is useful for quickly checking
+* ls: Lists the name of the files in the current directory
+* unzip: Takes one argument. It unzips the file and lists the file names.
+* cat: This command "concatenates" the file. It is useful for quickly checking
 a file content.
-* 
+Note: When typing arguments or commands, press tab key to use auto-complete
+feature. Double tab will bring the list of the files that are matched by the
+pattern.
+* wc: This is the word count program. It prints the lines, words and bytes are
+in the file.
+* diff: Compares files and tells you how they differ. The output starting with 
+< belongs to the left file and the output starts with the > right belongs to 
+the right file. 
 
+### Manual Pages
+
+You don' t have to remember every detail about a command. All common shell 
+programs come with the manual.
