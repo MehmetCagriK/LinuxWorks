@@ -99,8 +99,80 @@ in the file.
 * diff: Compares files and tells you how they differ. The output starting with 
 < belongs to the left file and the output starts with the > right belongs to 
 the right file. 
+* rm: The program that is used to remove files/directory in the argument given.
+* Ctrl C: This command is generally used to interrupt ongoing process of the
+current running program. It stops the process prematurely.
+* Ctrl d: This command is used to signify the end of file. This is more 
+graceful than Ctrl c.
+* less: This program is generally used to read longer files. It prints one page
+at a time.
+** <: Left angle is used to navigate to the start of the file.
+** >: Right angle is used to navigate to the end of the file. 
+** /<text_pattern>: Press enter to execute a search. Use n to go to next 
+occurrence and N to go to first occurrence. You can use regular expressions to
+search better.
+** 
+** q: quit
 
 ### Manual Pages
 
 You don' t have to remember every detail about a command. All common shell 
 programs come with the manual.
+
+Files starting with "." are generally used for caching, configuration and other
+things that you do not immediately care about. Shell hides them by default.
+
+### File System
+
+There are two kinds of objects in Linux filesystem: files and directories.
+In Linux, filename rules are pretty flexible. Only constraint is that you can't
+have / (forward slash) in your filenames. 
+
+When you write a filename that contains spaces or punctuation like !#$()[]%& ;
+you shall put the filename in single quotes or prece every special character 
+with a backslash. The latter is called escaping while former is called quoting.
+
+At the top of filesystem tree, there is root: top level directory. In Linux, 
+you can have multiple discs and multiple partitions. But unlike Windows, in 
+Linux there are no seperate top level directories for drives like( C:, D:).
+All files are under placed under the root/ . 
+
+In Linux, directories are seperated with forward slash where, in Windows, 
+directories(folders) are seperated with backslashes. Every directory starts
+with forward slashes.
+
+In shell, or any other program; there is a term called working directory. It 
+can be thought as directory shell is looking at. Many commands like ls, rm, mv
+etc takes default argument as current directory if the user does not provide 
+one.
+
+Absolute paths are paths starting from all the way up the root to the file 
+itself. But using absolute paths all the time can be harder. Instead, we can
+use relative paths(relative to the current working directory).
+
+Absolute paths start with forward slash while relative paths don't.You can use
+tilde to access home.
+
+You can use forward slash to access root.
+
+cd without arguments takes user to home directory.
+
+These commands are unusually short. There are 2 reasons for this. The most 
+important is that old systems had much lower bandwidth so shortening command
+names helps. Secondly they are faster to type.
+
+Use mkdir to  create directories. You can use rmdir to delete a directory(if
+it is empty). But if it is not, there is another called command called rm with
+argument -r to recursively remove the the directory.
+
+### Globbing
+
+Globbing is the technique to match files by name in Unix shell. A few pattern 
+samples are given below;
+
+* *: Matches any number of characters.
+* ?: Matches any single character.
+* {pat_1, pat_2}: Matches either one of patterns. Can be used n times.
+* [aeiou]: Matches any single one of the characters inside the bracket.
+
+Note: Filenames in Linux are case sensitive. It also applies for Globbing also. 
