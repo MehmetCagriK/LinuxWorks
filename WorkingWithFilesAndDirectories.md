@@ -56,15 +56,15 @@ start of the file. You can use **G** to the end of the file.
 
 We can use the commands below to read head or tail of the file
 
-# head: Displays lines from beginning of the file.
-# tail: Displays lines from the end of the file.
-## tail -f: Follows the tail of the file. It will track the end of the file.
+* head: Displays lines from beginning of the file.
+* tail: Displays lines from the end of the file.
+** tail -f: Follows the tail of the file. It will track the end of the file.
 Whenever there is a change, it will print it. It is an ongoing process. You can
 use **ctrl c** to stop following.
 
 # Creating Directories
 
-# mkdir dir_name: Creates a directory in the current path. Does not create a 
+* mkdir dir_name: Creates a directory in the current path. Does not create a 
 directory  if the name already exists.
 
 By default, mkdir works on the current directory. But you can give it a path 
@@ -83,24 +83,24 @@ You can use -v option to give a feedback from this command. Try it yourself.
 **mv** command is used for both moving and renaming files. Let's see the use 
 cases below;
 
-# ``mv file1.txt dir1/``: Moves file1.txt into the dir1 directory. If dir1 does
+* ``mv file1.txt dir1/``: Moves file1.txt into the dir1 directory. If dir1 does
 not exist,it won't move.
-# ``mv file1.txt dir1`` : This one is tricky. If dir1 does not exist as a 
+* ``mv file1.txt dir1`` : This one is tricky. If dir1 does not exist as a 
 directory in current directory, it will rename file1.txt to dir1. If there is 
 a directory called dir1 in current directory, it will move file1.txt into that 
 directory.
 Author's note: Trying an extra slash does not kill the user. So, to increase
 readability , just use extra slash to tell readers that you want to move into
 a directory. Also use better names for files and directories.
-# ``mv file1.txt file2.txt`` : Rename the file.
+* ``mv file1.txt file2.txt`` : Rename the file.
 
 You can give path before filenames when using mv command. There are important
 options to use with **mv** command;
 
-# -n: no overwriting if there is a file with same name.
-# -f: force overwriting, this is turned on by default.
-# -i: interactive overwriting: ask user before overwriting.
-# -v: verbose, print more info about the command.
+* -n: no overwriting if there is a file with same name.
+* -f: force overwriting, this is turned on by default.
+* -i: interactive overwriting: ask user before overwriting.
+* -v: verbose, print more info about the command.
 
 # Copying Files and Directories
 
