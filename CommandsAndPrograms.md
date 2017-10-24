@@ -96,3 +96,51 @@ Unix to stop that process.
 * kill <process_id>: Unix will try to kill but for some processes, this will not
 kill process.
 * kill -9 <process_id>:  Override Unix's careful approach, kill definitely.
+
+# Text File Helpers
+
+* wc: Prints the line, word and character count. For line, it counts line 
+return.
+* sort: Sorts the lines of the file and prints it. Does not modify. Capital 
+letters and lowercase letters are treated different than each other. 
+** -f: Ignores case of letters
+** -r: Reverse sort
+** -u: Sorted unique lines
+* uniq: Ignores consecutive duplicate lines.
+** -d: Prints consecutive duplicate lines
+** -u: Prints non-duplicate lines
+
+# Utility Programs
+
+* cal / ncal: Shows current month's calendar.
+** [month_num] [year_num]: Prints the month's and year's calendar.
+** -y : Prints current year's calendar.
+* nca: Rotates the day numbers and day names columns.
+* bc: bench calculator
+* expr: simpler calculator. ``expr 2 + 2``
+* units: scientific unit converter
+
+Author's note: Other than calendar and units, do not use these commands. Useless
+things.
+
+# Command History
+
+We have seen up and down arrows are used to navigate between commands. There is
+also a utility of Unix that saves bash commands into a history file. The file
+is called *.bash_history* file in the home directory(~). This file is updated 
+when bash is closed.
+
+When you type ``history`` into bash, it will show you the list of commands with
+numbers before them. You can use those numbers to reuse the command. Type 
+exclamation point before the number of the command. When we hit up arrow, we will
+see the actual command instead of the number.
+
+You can type exclamation point before a part or full name of the command to 
+return the most recent command starting with the argument. For example, 
+``!vi`` will bring last command executed starting with vi.
+
+* !3  : References history command 3
+* !-2 : References command which was 2 back
+* !cat: References most recent command starting with cat
+* !!  : References previous command
+* !$  : References previous command's arguments 
