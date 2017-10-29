@@ -176,5 +176,305 @@ not needed when you clean up some of your containers.
 
 # Network Between Containers
 
+Docker provides private network for use by the containers on your system. In
+fact, you can have several private networks to group containers nicely. Docker
+containers are isolated from the Internet by default. So containers does not 
+have to worry about other things interfering with their work.
 
+You explicitly set, when you run Docker who can talk to whom and on what ports.
+This is done by explicitly exposing ports and linking containers.
+```
+docker run --rm -ti -p 45678:45679 ubuntu bash
+```
+We exposed port 45678 inside container to the port 45679 outside the container.,
+So anyone outside the container can access port 45679 and it will be directed 
+to the port 45678 inside the container.
 
+You can expose ports explicitly and need to do the configuration so which one
+talks to which one. You can also expose ports dynamically so you do not have to
+worry about port availability in future. You fix the port inside the container 
+but outside port can be choosen dynamically.
+```
+$ docker run --rm -ti -p 45678 -p 45679 --name echo3_server ubuntu:14.04 bash
+$ docker port echo3_server 
+45679/tcp -> 0.0.0.0:32768
+45678/tcp -> 0.0.0.0:32769
+```
+
+As you can see,  Docker automatically assigned outside port from the available
+ones.``0.0.0.0.`` means receive connections from anywhere in the world.
+
+You can also create UDP port. TCP is default when you does not state 
+explicitly. Example for creating UDP port is ``docker run -p 1234:1234/udp``.
+
+# Linking Containers
+
+There is to way to link containers. First is the classic way, through host
+network and the other is directly connecting through virtual network provided
+by Docker.
+
+```
+# Run first container and expose 1234 port
+docker run --rm -ti -p 1234:1234 ubuntu:14.04 bash
+# Run second container and connect host's 1234 port with host's ip
+docker run --rm -ti ubuntu:14.04 bash
+root@d5b6d22ba997:/# nc 10.0.2.15 1234
+```
+Now with second container has connection to first one over host network. Second
+way is configuring containers through virtual network, when running them.
+```
+docker run --rm -ti --name server ubuntu:14.04 bash
+docker run --rm -ti --link server --name client ubuntu:14.04 bash
+```
+Above we create a server container and client container then link client to the
+server with run command. How does client know how to access server? When Docker
+runs second client, it adds entry for server into /etc/hosts. This is a bit
+risky  if your containers are not run and cleaned up together.
+Note: This is a one-way connection, from client to server.
+
+# Dynamic and Legacy Linking
+
+We mentioned that links may be broken when services stop or restart. Docker has
+private networks that you can set up, put containers in and Docker will keep 
+track of names of them in network level. These have built-in nameservers that 
+fix the links. You must create networks in advance.
+```
+docker network create example
+docker run --rm -ti --name server --net=example ubuntu:14.04 bash
+docker run --rm -ti --link server --net=example --name client ubuntu:14.04 bash
+```
+
+# Images
+
+You can list the images you have downloaded with ``docker images`` command.
+```
+REPOSITORY          TAG             IMAGE ID          CREATED           SIZE
+my_image_2          latest          86452a06722b      12 hours ago      100MB
+ubuntu              16.04           747cb2d60bbe      2 weeks ago       122MB
+ubuntu              latest          747cb2d60bbe      2 weeks ago       122MB
+debian              latest          874e27b628fd      2 weeks ago       100MB
+ubuntu              14.04           dea1945146b9      6 weeks ago       188MB
+hello-world         latest          05a3bd381fc2      6 weeks ago       1.84kB
+```
+
+Docker is space efficient, total storage used by Docker is not the sum of all
+image sizes you see on the output of ``docker images``. For example, ubuntu 
+images use same 122 MB storage.
+
+You can give Docker images a name when committing them. You can also tag the 
+images during this operation
+```
+docker commit 86452a06722b my_image_3
+docker commit 86452a06722b my_image_3:v2.0.1
+REPOSITORY          TAG             IMAGE ID          CREATED           SIZE
+my_image_3          latest          86452a06722b      12 hours ago      100MB
+my_image_3          v2.0.1          86452a06722b      12 hours ago      100MB
+```
+Default tag is **latest**. When you are tagging images, usually 
+*organization_name/image_name* is enough.
+
+You can download Docker images with ``docker pull`` but this command is 
+explicitly run by ``docker run``. Pulling beforehand is useful for online work.
+Opposite of pulling is done with ``docker push``.
+
+If you are not careful, images can accumulate quickly. ``docker rmi 
+image_name:tag``. You can use Docker ID of that image instead of name:tag.
+
+# Volumes
+
+Docker provides two different sharing mechanisms through volumes. First one is
+persistent volumes and second one ephemereal volumes. None of these volumes are
+part of the images. They are just local data.
+
+## Persistent Volumes
+
+Persistent volumes is used to share data between host and containers in a 
+permanent manner. You choose a single file or a directory on your host machine
+for it first. Then use the command below to configure your container to use 
+that file or directory in a shared manner;
+```
+docker run -ti -v ~/SharedFolderHost:/SharedFolderCont
+```
+Above we have choosen SharedFolderHost directory in the host machine and 
+configured container to use SharedFolderCont directory for sharing data. This
+SharedFolderHost can be used for sharing data with another container also. 
+The data in the SharedFolderHost will not be deleted automatically if all 
+containers using that are killed. For example, you can create another container
+later and configure it to use SharedFolderHost for sharing data, you still see
+the content.
+
+## Ephemereal Volumes
+
+These are shared discs that exist only as long as they are being used. When all
+of the containers using these are killed, ephemereal volume is destroyed also.
+These can be shared by many containers.
+
+```
+docker run -ti -v /SharedFolder --name first_share ubuntu bash
+docker run -ti --volumes-from first_share --name second_share ubuntu bash
+```
+Above we created a directory in *first_share* for sharing data between 
+containers. With second command, we run another container that uses first 
+container's shared directory. At this point, if we kill *first_share* while
+*second_share* is running, shared directory will not be destroyed. It will
+be destroyed when a shared directory is not used by any containers.
+
+# Registries
+
+Companies(including Docker) use registries to manage and distribute images.
+Docker makes it free but many companies use private registries. You can search
+registries for images, pull certain image from them or publish your image. You
+need an account for doing these.
+
+# What are Dockerfiles?
+
+Dockerfiles are small programs designed to describe how to build a Docker 
+image. Create Docker images from Dockerfile with ``docker build <name_of_image>
+<path_to_Dockerfile>``. When it finishes, resulting image will be in the local
+Docker registry. 
+
+When Docker builds from Dockerfile, after each line, a new image is produced.
+For each line, a container is created from the image of previous line. Some
+changes are made and when that line is done, a new image is created. State is 
+not carried to next line.
+  
+Each newly created image is an input to the next line. Image created from the
+previous line is unchanged, not edited during next run. You also do not want to
+let temporary changes stay more than one line, like downloading a big file. If 
+you do not delete the file after downloading and using, resulting image will be
+unnecessarily huge.
+
+Each step of building image from Dockerfile is cached. So the next time you 
+build the same Dockerfile, if nothing is changed for a step, cached version 
+will  be used instead of executing step again. Check ``using cache`` for build
+output. Docker can skip lines that have not changed since the last build and it
+is efficient. You should put the parts  that change the most at the end of 
+Dockerfile. So you can use caching mechanism cleverly.
+
+Dockerfiles look like shell scripts but they are not. Processes you start on 
+one line will only live when that line's container is running, then it will 
+stop. If you want to have two program start on the same container, put them on
+same line.
+
+Use ``ENV`` command persists across lines(thus across images)
+
+# Building the Dockerfiles
+
+Let's see how to build Dockerfile from simple examples
+```
+FROM busybox
+RUN echo "building simple docker image"
+CMD echo "hello container"
+```
+
+* FROM: What image to start with. 
+* RUN: Create a container and that run something in that container, then commit
+that container into an image.
+* CMD: When this image is start, run something.
+
+Building the Dockerfile above will give these outputs below;
+```
+docker build -t hello3 .
+Sending build context to Docker daemon  2.048kB
+Step 1/3 : FROM busybox # Prints the step
+ ---> 54511612f1c4 # Creates an image, prints its ID
+Step 2/3 : RUN echo "building simple docker image now" # Prints the step
+ ---> Running in 46219ab67964 # Runs a container comprised of image 54511612f1c4
+building simple docker image now # Does what step tells to do
+ ---> e4a20cc7b589 # Creates an image 
+Removing intermediate container 46219ab67964 # Removes the intermediate container
+Step 3/3 : CMD echo "hello, container" # Prints the step
+ ---> Running in d420ff5e8d18 # Runs a container from the image e4a20cc7b589
+ ---> 1c443dbd555b # Creates an image
+Removing intermediate container d420ff5e8d18 # Removes the intermediate container
+Successfully built 1c443dbd555b # Prints the success output of whole process
+Successfully tagged hello3:latest # Tagging is done at last step
+```
+
+Let's see another example Dockerfile;
+```
+FROM debian:sid
+RUN apt-get -y update
+RUN apt-get install nano
+CMD ["/bin/nano","/tmp/notes"]
+```
+This version starts with debian:sid. Then it updates package lists. In the next
+step it installs Nano. At last step, when the container is run, creates a file 
+and starts to edit with Nano.
+
+You can also use the images you created and put into local registry. Let's say 
+the name of image created with the build above is called *nanoer*.
+
+```
+FROM nanoer
+ADD notes.txt /notes.txt
+CMD "nano" "notes.txt"
+```
+
+In this Dockerfile, it is instructed that start with nanoer image, put 
+**notes.txt**(ensure file exists) in, then when container is run, start to edit
+**notes.txt** with nano.
+
+Let's revisit some of the important statements in Dockerfile
+* FROM: This sets the starting image of the image we want to build. The very 
+first line in a Dockerfile should be this. If you put more than one FROM 
+statements, it meant you want to create more than one image with same 
+Dockerfile.
+* MAINTAINER: Defines the author of this Dockerfile(pure documentation). The
+general format is ``<Firstname Lastname E-MailAddress>``.
+* ADD: Generally adds files into images. It is not just limited to moving files
+but includes also adding contents of .tar file or downloading from a link to 
+given location.
+* ENV: Sets environment variables that persist during build and running the 
+output image.
+* CMD: Specifies the whole command to run. These command can be in two forms.
+** Shell form: nano notes.txt
+** Exec form : "/bin/nano" "notes.txt" 
+* EXPOSE: Maps port into the container
+* VOLUME: Like -v option we used when we ran docker containers, two argument
+means permanent volumes and single argument means ephemereal volumes. You 
+should generally avoid defining shared folders with the host since it means
+those sharing will only work at your own computer.
+* WORKDIR: Sets the directory for the rest of the build and in resulting image.
+* USER: Sets which user will the container run as.
+
+# Golden Images
+
+To prevent golden image problem;
+* Include the installers in your project. Those setup files might not be 
+available couple years later and you don't want to get caught unprepared.
+* Have a canonical build that builds everything completely from scratch.
+* Use small base images like Alpine. If you start with a large operating system
+it will take more maintenance.
+* Build your images always from Dockerfiles. It is easy to maintain and 
+understand possible future bugs.
+* Do not leave passwords in images.
+
+# The Program Docker
+
+## Introduction
+
+Kernel runs directly on hardware. It has a lot of jobs;
+* Responds to messages from hardware
+* Starts and schedules programs
+* Controls and organizes the storage
+* Passes messages between programs(the programs might be on same or different 
+computer)
+* Allocates resources, memory, CPU, network and so on
+
+Docker is a program that manages kernel. It is written in Go, a new system 
+language. Docker manages several features of the kernel and use these features
+to build the concept of containers and images. Docker uses control groups or
+cgroups to create illusion of living in their little isolated world. It uses
+namespaces to contain networks. It also uses "copy-on-write" filesystem to 
+build the idea images. Images are read only, you can not change it but run 
+containers from them and do things.
+
+Docker made all of the things above easy, approachable and popular. It makes
+scripting distributed systems easy.
+
+Docker is divived into two programs: client and the server. These communicate
+through networks sockets(different computers) or a file(same computer). Clients
+connect to the socket, send commands to server so that creates or deletes 
+containers and all of the rest. Clients can even be in another Docker container
+as long as they can communicate to the Docker server.
